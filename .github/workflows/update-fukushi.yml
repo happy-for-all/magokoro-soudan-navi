@@ -1,0 +1,55 @@
+name: Magokoro SW Navigator Auto Update
+
+on:
+  schedule:
+    - cron: '27 6 1 * *' # 👑 毎月1日の朝6:27に自動起動（混雑を完全に避けて実行）
+  workflow_dispatch: # 手動実行も可能
+
+permissions:
+  contents: write
+
+jobs:
+  update-db:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11' # 👑 ちゃろさんお気に入りの3.11を死守！
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run Update Script
+      env:
+        GEMINI_API_KEY: "NOT_USED" # 👑 AI APIは一切使わない（0円運用）
+      run: python update_fukushi_db.py
+
+    # 👑 自動で上書きコミットし、リポジトリの60日サスペンドを完全に回避
+    - name: Commit and Push DB File
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add fukushi_db.json
+        git diff --quiet && git diff --staged --quiet || {
+          git commit -m "Auto-update fukushi DB to version 1.2.0"
+          git pull --rebase origin main
+          git push
+        }
+
+    # 👑 デプロイ自動化：wrangler.tomlが存在するときのみCloudflareに最新DBをデプロイ
+    - name: Deploy to Cloudflare Workers
+      env:
+        CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      run: |
+        if [ -f wrangler.toml ]; then
+          npx wrangler deploy
+        else
+          echo "⚠️ wrangler.toml が見つからないためデプロイをスキップします。"
+        fi
