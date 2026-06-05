@@ -1,0 +1,33 @@
+{
+  "system_config": {
+    "version": "1.2.0",
+    "fukushi_source_urls": [
+      "https://www.mhlw.go.jp/content/000705432.csv",
+      "https://www.mhlw.go.jp/content/000999999.csv",
+      "https://pub-data.digital.go.jp/fukushi/latest.csv"
+    ]
+  },
+  "national_services": [
+    {
+      "name": "よりそいホットライン（通話完全無料）",
+      "tel": "0120-279-338",
+      "official_url": "https://www.since2011.net/yorisoi/",
+      "hours": "24時間 365日受付",
+      "description": "どんな悩みでも、電話・SNS・メールで24時間寄り添って話を聞いてくれる、国の最後の砦です。"
+    },
+    {
+      "name": "DV相談プラス（内閣府）",
+      "tel": "0120-279-889",
+      "official_url": "https://soudanplus.jp/",
+      "hours": "24時間 365日受付",
+      "description": "配偶者やパートナーからの暴力（DV）に悩んでいる方のための、専門の相談窓口です。"
+    },
+    {
+      "name": "法テラス（日本司法支援センター）",
+      "tel": "0570-078-374",
+      "official_url": "https://www.houterasu.or.jp/",
+      "hours": "平日 09:00-21:00 / 土曜 09:00-17:00",
+      "description": "借金（債務整理）、家賃滞納、法的トラブルに直面した人が、無料で法律相談を受けられる国営の窓口です。"
+    }
+  ]
+}
