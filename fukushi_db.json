@@ -1,0 +1,74 @@
+{
+  "version": "1.2.0",
+  "updated_at": "2026-06-06 15:37:32",
+  "national_services": [
+    {
+      "name": "よりそいホットライン（通話完全無料）",
+      "tel": "0120-279-338",
+      "official_url": "https://www.since2011.net/yorisoi/",
+      "hours": "24時間 365日受付",
+      "description": "どんな悩みでも、電話・SNS・メールで24時間寄り添って話を聞いてくれる、国の最後の砦です。"
+    },
+    {
+      "name": "DV相談プラス（内閣府）",
+      "tel": "0120-279-889",
+      "official_url": "https://soudanplus.jp/",
+      "hours": "24時間 365日受付",
+      "description": "配偶者やパートナーからの暴力（DV）に悩んでいる方のための、専門の相談窓口です。"
+    },
+    {
+      "name": "法テラス（日本司法支援センター）",
+      "tel": "0570-078-374",
+      "official_url": "https://www.houterasu.or.jp/",
+      "hours": "平日 09:00-21:00 / 土曜 09:00-17:00",
+      "description": "借金（債務整理）、家賃滞納、法的トラブルに直面した人が、無料で法律相談を受けられる国営の窓口です。"
+    }
+  ],
+  "facilities": [
+    {
+      "prefecture": "品川区社会福祉協議会 自立相談支援窓口",
+      "city": "東京都品川区大井1-14-1",
+      "name": "03-5718-7171",
+      "address": "-",
+      "tel": "https://www.shinashakyo.jp/contact/",
+      "mail": "平日 08:30-17:15",
+      "form_url": "生活困窮",
+      "official_url": "家賃支援",
+      "hours": "https://www.shinashakyo.jp/",
+      "last_verified": "2026-06-06",
+      "tags": [
+        "貸付相談"
+      ]
+    },
+    {
+      "prefecture": "東大阪市生活自立サポートセンター",
+      "city": "大阪府東大阪市荒本北1-1-1",
+      "name": "06-4309-3182",
+      "address": "-",
+      "tel": "-",
+      "mail": "平日 09:00-17:30",
+      "form_url": "生活困窮",
+      "official_url": "自立相談",
+      "hours": "https://www.city.higashiosaka.lg.jp/",
+      "last_verified": "2026-06-06",
+      "tags": [
+        "-"
+      ]
+    },
+    {
+      "prefecture": "八尾市 自立相談窓口",
+      "city": "大阪府八尾市本町1-1-1",
+      "name": "072-924-3834",
+      "address": "-",
+      "tel": "-",
+      "mail": "平日 08:45-17:15",
+      "form_url": "生活困窮",
+      "official_url": "家賃支援",
+      "hours": "https://www.city.yao.osaka.jp/",
+      "last_verified": "2026-06-06",
+      "tags": [
+        "-"
+      ]
+    }
+  ]
+}
