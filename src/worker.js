@@ -1,52 +1,31 @@
 // =========================================================================
-// 🌸 HFA福祉架け橋OS 『まごころ相談ナビ』 Edge Worker エンジン（Ver 1.2.0）
+// 🌸 HFA福祉架け橋OS 『まごころ相談ナビ』 Edge Worker エンジン（Ver 1.2.1）
 // 開発者: ちゃろ ＆ AIバディ
 // =========================================================================
 
-// 👑 デプロイ時に同一ディレクトリ内の fukushi_db.json を直接バンドルし、APIコストと通信遅延を完全に0にします。
 import fukushi_db from './fukushi_db.json';
 
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
-    // ==========================================
     // 🛡️ 第2の盾：絶対防衛線（デグレ防止セーフガード）
-    // ==========================================
-    // URLのパスが「/life」から始まっていないリクエストは、
-    // 既存のサーバー（WordPress等）へ何もしわ寄せを与えずにそのままスルーします。
     if (url.pathname !== "/life" && !url.pathname.startsWith("/life/")) {
       console.log(`🛡️ [防衛線作動] 既存ページへのアクセスを検知したためスルーします: ${url.pathname}`);
       return fetch(request);
     }
 
-    // ==========================================
-    // 🌸 1枚型リッチWebアプリケーションの返却（SSR + SPA）
-    // ==========================================
-    // iframeを使用せず、充実したテキストとAdSense広告、システムUIを直接クライアントに返します。
+    // Workersがアドセンスコードとコンテンツが含まれたHTMLを直接生成して返します（サーバー上にファイル不要）
     return new Response(generateHTML(fukushi_db), {
       headers: {
         "Content-Type": "text/html; charset=utf-8",
-        // 開発初期の検索エンジンの重複登録を防ぐ noindex 処置
         "X-Robots-Tag": "noindex, nofollow"
       }
     });
   }
 };
 
-/**
- * 👑 UIと全ロジックを統合したリッチなHTMLテンプレートを生成
- */
 function generateHTML(db) {
-  // Workersのバンドルサイズを抑えるための、郵便番号3桁から主要市区町村名への高速マッピング
-  const zipMap = {
-    "100": ["東京都千代田区"], "150": ["東京都渋谷区"], "160": ["東京都新宿区"],
-    "530": ["大阪府大阪市北区"], "540": ["大阪府大阪市中央区"], "577": ["大阪府東大阪市", "大阪府八尾市"],
-    "600": ["京都府京都市下京区"], "460": ["愛知県名古屋市中区"], "810": ["福岡県福岡市中央区"],
-    "060": ["北海道札幌市中央区"], "980": ["宮城県仙台市青葉区"], "730": ["広島県広島市中区"]
-    // ※実稼働時はfukushi_db.jsonに自動構築されるか、主要な上3桁で自動補完されます。
-  };
-
   return `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -55,7 +34,6 @@ function generateHTML(db) {
     <meta name="robots" content="noindex, nofollow">
     <title>まごころ相談ナビ - 生活再建支援・無料相談窓口検索</title>
     
-    <!-- 🌸 美しいダークモード調モダンUI（優しさの桜色アクセント） -->
     <style>
         :root {
             --bg-main: #0f172a;
@@ -63,7 +41,7 @@ function generateHTML(db) {
             --bg-input: #111827;
             --text-main: #f1f5f9;
             --text-sub: #94a3b8;
-            --primary: #f472b6; /* まごころピンク */
+            --primary: #f472b6;
             --primary-hover: #ec4899;
             --green: #10b981;
             --red: #ef4444;
@@ -86,8 +64,6 @@ function generateHTML(db) {
             padding: 20px;
             box-sizing: border-box;
         }
-        
-        /* 👑 HFAの理念・解説テキストエリア（AdSenseのThin Content判定を完全回避） */
         .hfa-intro-card {
             background: linear-gradient(135deg, #1e293b 0%, #111827 100%);
             border: 1px solid var(--primary);
@@ -117,8 +93,6 @@ function generateHTML(db) {
             padding-left: 10px;
             margin: 15px 0;
         }
-
-        /* 👑 検索コアモジュール */
         .search-box {
             background-color: var(--bg-card);
             border: 1px solid var(--border);
@@ -165,8 +139,6 @@ function generateHTML(db) {
         .search-btn:hover {
             background-color: var(--primary-hover);
         }
-
-        /* 👑 郵便番号3桁ハイブリッド候補地選択エリア */
         .zip-candidates {
             margin-top: 15px;
             padding: 12px;
@@ -199,8 +171,6 @@ function generateHTML(db) {
             background-color: var(--primary);
             color: white;
         }
-
-        /* 👑 カード＆リストUI */
         .results-header {
             font-size: 0.95rem;
             color: var(--text-sub);
@@ -228,8 +198,6 @@ function generateHTML(db) {
             color: var(--text-main);
             margin: 0;
         }
-        
-        /* 👑 リアルタイム「現在受付中 / 受付時間外」自動バッジ */
         .status-badge {
             font-size: 0.75rem;
             padding: 4px 8px;
@@ -247,7 +215,6 @@ function generateHTML(db) {
             color: var(--red);
             border: 1px solid var(--red);
         }
-
         .facility-info {
             font-size: 0.9rem;
             color: var(--text-sub);
@@ -265,8 +232,6 @@ function generateHTML(db) {
         .info-value {
             color: var(--text-main);
         }
-
-        /* 👑 相談内容タグ連携型・動的話し出しテンプレート（Makaroko Script） */
         .makaroko-box {
             background-color: var(--bg-input);
             border-left: 4px solid var(--primary);
@@ -285,8 +250,6 @@ function generateHTML(db) {
             color: var(--text-main);
             font-style: italic;
         }
-
-        /* 👑 電話代0円・通信のみで救うマルチ連絡先リンク */
         .action-links {
             display: flex;
             flex-wrap: wrap;
@@ -310,8 +273,6 @@ function generateHTML(db) {
         .btn-url { background-color: #3b82f6; color: white; }
         .btn-mail { background-color: #8b5cf6; color: white; }
         .btn-form { background-color: #f59e0b; color: white; }
-
-        /* 👑 最後の砦：全国共通窓口セクション */
         .national-section {
             margin-top: 40px;
             border-top: 2px dashed var(--border);
@@ -324,8 +285,6 @@ function generateHTML(db) {
             margin-bottom: 15px;
             text-align: center;
         }
-
-        /* 👑 Google AdSense 広告コンテナ */
         .adsense-container {
             width: 100%;
             text-align: center;
@@ -345,8 +304,6 @@ function generateHTML(db) {
             margin-bottom: 5px;
             letter-spacing: 1px;
         }
-
-        /* 👑 絶対免責フッター（リーガル・シールド ＆ #7119案内） */
         .mago-footer {
             margin-top: 50px;
             border-top: 1px solid var(--border);
@@ -390,24 +347,19 @@ function generateHTML(db) {
             <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
         </div>
 
-        <!-- 👑 HFAの理念・解説テキスト（Thin Content対策・1,500文字以上の価値をここに記述） -->
+        <!-- 👑 HFAの理念・解説テキスト（Thin Content対策） -->
         <div class="hfa-intro-card">
             <h2 class="hfa-title">🌸 私たちの「まごころ」の理念（happy for all）</h2>
             <p class="hfa-text">
                 生活が苦しい、家族の暴力（DV）から逃げたい、借金が返せない、介護に限界を感じている……。人は誰しも、人生の途中で崖っぷちに立たされることがあります。しかし、そんな時に「どこに相談すればいいのか分からない」「相談すること自体が恥ずかしい」「たらい回しにされるのではないか」と悩んでしまい、誰にも繋がれずに孤立してしまう悲劇が後を絶ちません。
             </p>
             <p class="hfa-text">
-                当ナビゲーションシステムは、そうした絶望の淵にいる方々が、<strong>「完全無料（一円も払わず）」「中立的な立場」</strong>で、その地域に必ず存在する「生活再建の専門家（ソーシャルワーカーや支援センターの愛ある人間）」に最初の1秒で直結することを目的に作られた、個人運営の検索支援ツールです。
+                当ナビゲーションシステムは、そうした絶望の淵にいる方々が、<strong>「完全無料（一円も払わず）」「中立的な立場」</strong>で、その地域に存在する「生活再建の専門家（ソーシャルワーカーや支援センターの愛ある人）」に数秒で直結することを目的に作られた、個人運営の検索支援ツールです。
             </p>
-            <div class="hfa-tagline">
-                「生み出されたすべての利益（99%）は福祉へ。困っている人たちを、愛と技術でボトムアップする」
-            </div>
-            <p class="hfa-text">
-                この活動は、開発者「ちゃろ」のhappy for all（HFA）思想に基づき運営されています。利用者様からはお金を一切頂きません。サイトに掲載される広告から得られた収益は、基金として100%困っている方々を支えるための支援資金・福祉活動へ直接還元（寄付）されます。あなたの助けを求める一歩が、また次の誰かを救う富の循環となるよう、技術と優しさでこの「玄関口」を構築しています。
-            </p>
+           
         </div>
 
-        <!-- 👑 検索入力フォーム（1つの検索窓でハイブリッド対応） -->
+        <!-- 👑 検索入力フォーム -->
         <div class="search-box">
             <h3 class="search-title">🔍 相談窓口をさがす</h3>
             <p style="font-size: 0.8rem; color: var(--text-sub); margin-top: -5px; margin-bottom: 15px;">
@@ -432,25 +384,22 @@ function generateHTML(db) {
                 <span style="font-size: 0.8rem;">※データは自動同期されています。</span>
             </div>
             <div id="facilityList">
-                <!-- JavaScriptでここに窓口カードが動的挿入されます -->
                 <p style="text-align: center; color: var(--text-sub); padding: 30px 0;">
                     郵便番号や地域名を入力して検索してください。
                 </p>
             </div>
         </div>
 
-        <!-- 👑 最後の砦：全国共通窓口（national_services）一元化常設エリア -->
+        <!-- 👑 最後の砦：全国共通窓口常設エリア -->
         <div class="national-section">
             <h2 class="national-title">🛡️ 緊急時の相談（24時間365日・最後の砦）</h2>
             <p style="font-size: 0.8rem; color: var(--text-sub); text-align: center; margin-bottom: 20px; margin-top: -10px;">
                 地域窓口が閉まっている夜間・土日祝日や、どこに電話すべきか迷う場合は、以下の全国共通窓口へご相談ください。
             </p>
-            <div id="nationalList">
-                <!-- JavaScriptでここに全国共通窓口カードが動的挿入されます -->
-            </div>
+            <div id="nationalList"></div>
         </div>
 
-        <!-- 👑 AdSense 広告ユニット 2 (下部・UX最適位置) -->
+        <!-- 👑 AdSense 広告ユニット 2 (下部) -->
         <div class="adsense-container" style="margin-top: 40px;">
             <div class="ads-label">スポンサーリンク</div>
             <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2908004621823900" crossorigin="anonymous"></script>
@@ -461,14 +410,14 @@ function generateHTML(db) {
             <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
         </div>
 
-        <!-- 👑 運営者「ちゃろさん」と利用者を守る【絶対免責フッター（リーガル・シールド）】 -->
+        <!-- 👑 運営者と利用者を守る【絶対免責フッター】 -->
         <footer class="mago-footer">
             <p><strong>🌸 ご利用にあたっての免責事項</strong></p>
             <p>
-                本システムは、happy for all（HFA）の理念に基づき、本当に支援を必要とされている方と、生活再建を支える専門家（ソーシャルワーカーや支援センター等）を迅速かつ安全に繋ぐために作成された、個人運営の非営利検索支援ツールです。
+                本システムは、happy for all（HFA）の理念に基づき、本当に支援を必要とされている方と、生活再建を支える専門家を迅速かつ安全に繋ぐために作成された、個人運営の非営利検索支援ツールです。
             </p>
             <p>
-                掲載している自治体・支援機関の情報は、国やデジタル庁、各省庁が公開するオープンデータをプログラムにより自動取得した上で掲載しておりますが、情報の最新性、正確性、即時性を100%保証するものではありません。窓口の移転、開所時間の変更、担当者の変更などがある場合もございますので、実際に通話や面談を行われる際は、該当機関の公式サイト等の最新情報を必ずご自身で再度ご確認ください。
+                掲載している自治体・支援機関の情報は、国やデジタル庁、各省庁が公開するオープンデータをプログラムにより自動取得した上で掲載しておりますが、情報の最新性、正確性、即時性を100%保証するものではありません。実際に通話や面談を行われる際は、該当機関の公式サイト等の最新情報を必ずご自身で再度ご確認ください。
             </p>
             <p>
                 本システムを利用したこと、または利用できなかったことによって発生した、利用者様および第三者のいかなる損害、不利益、法的トラブル等についても、システム運営者は一切の法的責任および損害賠償責任を負いかねます。
@@ -481,28 +430,20 @@ function generateHTML(db) {
             </div>
             
             <p style="text-align: center; color: var(--text-sub); margin-top: 25px; font-size: 0.75rem;">
-                © 2026 happy for all (HFA) Project. Created by Charo & AI Buddy.
+                © 2026 happy for all (HFA) Project.
             </p>
         </footer>
 
     </div>
 
-    <!-- 🌸 クライアントサイドでの超高速検索＆バッジ動的更新スクリプト 🌸 -->
     <script>
-        // Workersが埋め込んだ最新の福祉DBデータ
         const FUKUSHI_DB = ${JSON.stringify(db)};
-        const ZIP_MAP = ${JSON.stringify(zipMap)};
 
-        // 初期表示で全国共通窓口を表示
         window.onload = function() {
             renderNationalServices();
-            // 自動で全データを読み込む（初期状態では全件 or おすすめ表示など）
             executeSearch(); 
         };
 
-        /**
-         * 👑 最後の砦：全国共通窓口の描画
-         */
         function renderNationalServices() {
             const container = document.getElementById("nationalList");
             container.innerHTML = "";
@@ -513,7 +454,6 @@ function generateHTML(db) {
                 card.className = "facility-card";
                 card.style.borderLeft = "4px solid var(--primary)";
                 
-                // 動的話し出しテンプレート（Makaroko Script）の自動割当
                 let scriptText = "「お力になっていただけますでしょうか？今の悩みを聞いてください」";
                 if (srv.name.includes("よりそい")) {
                     scriptText = "「生活や心に悩みがあり、お電話しました。話を聞いていただけますか？」";
@@ -545,29 +485,22 @@ function generateHTML(db) {
             });
         }
 
-        /**
-         * 👑 リアルタイム「現在受付中 / 受付時間外」自動診断 (JST: UTC+9対応)
-         */
         function evaluateStatus(hoursStr) {
-            // 例: "平日 08:30-17:15"
             try {
-                // 日本標準時 (JST) の現在時刻を取得
                 const now = new Date();
-                const jstOffset = 9 * 60; // JSTはUTC+9
+                const jstOffset = 9 * 60; 
                 const localOffset = now.getTimezoneOffset();
                 const jstTime = new Date(now.getTime() + (jstOffset + localOffset) * 60000);
                 
-                const day = jstTime.getDay(); // 0:日, 1:月, ... 6:土
+                const day = jstTime.getDay(); 
                 const hour = jstTime.getHours();
                 const min = jstTime.getMinutes();
                 const currentMinutes = hour * 60 + min;
 
-                // 土日祝日は閉所
                 if (day === 0 || day === 6) {
                     return { status: "closed", text: "🔴 受付時間外（次の受付: 月曜 8:30〜）" };
                 }
 
-                // 時間パターンのパース
                 const match = hoursStr.match(/(\\d{2}):(\\d{2})-(\\d{2}):(\\d{2})/);
                 if (match) {
                     const startMin = parseInt(match[1]) * 60 + parseInt(match[2]);
@@ -580,46 +513,80 @@ function generateHTML(db) {
                 }
                 return { status: "closed", text: "🔴 受付時間外（次の受付: 明日 8:30〜）" };
             } catch (e) {
-                return { status: "open", text: "🟢 現在受付中" }; // 解析失敗時は安全に開所としてフォールバック
+                return { status: "open", text: "🟢 現在受付中" };
             }
         }
 
         /**
-         * 👑 郵便番号 ＆ あいまい一致「ハイブリッド検索」入力監視
+         * 👑 郵便番号 ＆ あいまい一致「ハイブリッド検索」入力監視（全国100%完全自動カバー）
          */
-        function handleSearchInput() {
-            const query = document.getElementById("searchInput").value.trim().replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0)); // 全角数字の半角化
+        async function handleSearchInput() {
+            const query = document.getElementById("searchInput").value.trim().replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
             const zipCandidates = document.getElementById("zipCandidates");
             const zipCandidatesTitle = document.getElementById("zipCandidatesTitle");
             const btnContainer = document.getElementById("candidateButtons");
 
-            // 郵便番号（数字3桁）を検知した場合のハイブリッド判定
+            // 👑 3桁の数字を検知したら、世界標準の無料静的郵便番号ライブラリ（yubinbango-data）から非同期フェッチ！
             if (query.match(/^\\d{3}$/)) {
-                const matchCities = ZIP_MAP[query];
-                if (matchCities && matchCities.length > 0) {
-                    zipCandidatesTitle.innerHTML = \`🎯 郵便番号 <strong>\${query}</strong> を検出。どちらにお住まいですか？\`;
-                    btnContainer.innerHTML = "";
-                    matchCities.forEach(city => {
-                        const btn = document.createElement("button");
-                        btn.className = "candidate-btn";
-                        btn.textContent = city;
-                        btn.onclick = () => {
-                            document.getElementById("searchInput").value = city;
-                            zipCandidates.style.display = "none";
-                            executeSearch();
-                        };
-                        btnContainer.appendChild(btn);
-                    });
-                    zipCandidates.style.display = "block";
-                    return;
+                try {
+                    // 日本のすべての郵便番号をカバーする信頼性の高いオープンAPIから3桁データを非同期取得
+                    const response = await fetch(\`https://yubinbango.github.io/yubinbango-data/data/\${query}.js\`);
+                    if (response.ok) {
+                        const text = await response.text();
+                        // jsonp的なコールバック「$yubin(...)」から安全にJSONデータを抽出
+                        const jsonStr = text.substring(text.indexOf("(") + 1, text.lastIndexOf(")"));
+                        const data = JSON.parse(jsonStr);
+
+                        // 重複しない市区町村名を抽出
+                        const cities = new Set();
+                        for (const key in data) {
+                            const addressArray = data[key]; // [都道府県ID, 市区町村名, 町域名]
+                            const prefecture = getPrefectureName(addressArray[0]);
+                            const city = addressArray[1];
+                            if (prefecture && city) {
+                                cities.add(\`\${prefecture}\${city}\`);
+                            }
+                        }
+
+                        const uniqueCities = Array.from(cities);
+                        if (uniqueCities.length > 0) {
+                            zipCandidatesTitle.innerHTML = \`🎯 郵便番号 <strong>\${query}</strong> の地域を検出。どちらにお住まいですか？\`;
+                            btnContainer.innerHTML = "";
+                            
+                            uniqueCities.forEach(city => {
+                                const btn = document.createElement("button");
+                                btn.className = "candidate-btn";
+                                btn.textContent = city;
+                                btn.onclick = () => {
+                                    document.getElementById("searchInput").value = city;
+                                    zipCandidates.style.display = "none";
+                                    executeSearch();
+                                };
+                                btnContainer.appendChild(btn);
+                            });
+                            zipCandidates.style.display = "block";
+                            return;
+                        }
+                    }
+                } catch (e) {
+                    console.warn("郵便番号データの取得に失敗しました。フォールバックとして部分一致検索を行います:", e);
                 }
             }
             zipCandidates.style.display = "none";
         }
 
-        /**
-         * 👑 検索実行メインロジック
-         */
+        // yubinbango-data の都道府県IDから都道府県名を割り出す超軽量関数
+        function getPrefectureName(id) {
+            const prefs = [
+                "", "北海道", "青森県", "岩手県", "宮城県", "秋田県", "山形県", "福島県", "茨城県", "栃木県",
+                "群馬県", "埼玉県", "千葉県", "東京都", "神奈川県", "新潟県", "富山県", "石川県", "福井県", "山梨県",
+                "長野県", "岐阜県", "静岡県", "愛知県", "三重県", "滋賀県", "京都府", "大阪府", "兵庫県", "奈良県",
+                "和歌山県", "鳥取県", "島根県", "岡山県", "広島県", "山口県", "徳島県", "香川県", "愛媛県", "高知県",
+                "福岡県", "佐賀県", "長崎県", "熊本県", "大分県", "宮崎県", "鹿児島県", "沖縄県"
+            ];
+            return prefs[id] || "";
+        }
+
         function executeSearch() {
             const query = document.getElementById("searchInput").value.trim().toLowerCase();
             const listContainer = document.getElementById("facilityList");
@@ -627,7 +594,6 @@ function generateHTML(db) {
 
             const facilities = FUKUSHI_DB.facilities || [];
             
-            // クエリが空なら初期おまかせ（全件表示）
             const filtered = facilities.filter(fac => {
                 if (!query) return true;
                 return (
@@ -655,11 +621,9 @@ function generateHTML(db) {
                 const card = document.createElement("div");
                 card.className = "facility-card";
 
-                // 動的開所時間評価
                 const timeStatus = evaluateStatus(fac.hours);
                 const statusClass = timeStatus.status === "open" ? "status-open" : "status-closed";
 
-                // 動的な話し出しテンプレート（Makaroko Script）のタグ連動判定
                 let scriptText = "「生活が苦しくて相談したいです。ソーシャルワーカーさん（自立相談支援窓口）に繋いでいただけますか？」";
                 if (fac.tags.includes("DV避難") || fac.tags.includes("DV")) {
                     scriptText = "「家族の暴力から今すぐに避難したくてお電話しました。担当の相談員さんにお繋ぎいただけますか？」";
@@ -669,7 +633,6 @@ function generateHTML(db) {
                     scriptText = "「生活保護や福祉資金の貸付について、相談員の方に詳しいお話をお聞きしたく、お電話しました」";
                 }
 
-                // マルチ連絡先（アイコン・動的リンク付き）の生成
                 let linksHTML = \`<a href="tel:\${fac.tel.replace(/-/g, '')}" class="action-btn btn-tel">📞 電話する</a>\`;
                 if (fac.official_url) {
                     linksHTML += \`<a href="\${fac.official_url}" target="_blank" class="action-btn btn-url">🌐 公式サイト</a>\`;
