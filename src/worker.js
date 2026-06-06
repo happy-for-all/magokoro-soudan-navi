@@ -3,7 +3,7 @@
 // 開発者: ちゃろ ＆ AIバディ
 // =========================================================================
 
-import fukushi_db from './fukushi_db.json';
+import fukushi_db from '../fukushi_db.json';
 
 export default {
   async fetch(request, env, ctx) {
