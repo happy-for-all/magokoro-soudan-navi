@@ -2,11 +2,12 @@ import os
 import requests
 import pandas as pd
 import json
+import sys  # 👑 エラーを正しくActionsに伝えるために追加
 from datetime import datetime, timezone, timedelta
 
 # ==========================================
-# 👑 福祉架け橋OS: データベース更新エンジン（Ver 1.2.0）
-# 開発者: ちゃろ ＆ AIバディ
+// 👑 福祉架け橋OS: データベース更新エンジン（Ver 1.2.2 堅牢版）
+// 開発者: ちゃろ ＆ AIバディ
 # ==========================================
 
 CONFIG_FILE = "config.json"
@@ -26,14 +27,12 @@ def fetch_data_with_fallback(urls):
             response = requests.get(url, timeout=10)
             if response.status_code == 200:
                 print(f"🎉 データの取得に成功しました！ URL: {url}")
-                # 一時ファイルに保存
                 with open("temp_fukushi.csv", "wb") as f:
                     f.write(response.content)
                 return "temp_fukushi.csv"
         except Exception as e:
             print(f"[警告] ソースURL ({url}) の取得に失敗しました。原因: {e}")
             
-    # すべてのネットURLが全滅（404）した場合の「最終防衛線：固定マスターCSV」のロード
     if os.path.exists(MASTER_CSV):
         print(f"🛡️ [最終防衛フォールバック] ネット上のURLがすべて全滅したため、安全のために『{MASTER_CSV}（ローカル固定マスター）』からデータベースを構築します。")
         return MASTER_CSV
@@ -48,19 +47,29 @@ def main():
     config = load_config()
     urls = config["system_config"]["fukushi_source_urls"]
     
-    # 4段階フォールバックによる安全データ取得
     csv_file = fetch_data_with_fallback(urls)
     
     if csv_file is None:
-        print("❌ [致命的エラー] すべてのデータソースおよび固定マスターCSVの読み込みに失敗しました。現在のデータを保護するため、書き出しを安全にスキップして早期終了します（デグレ防止）。")
-        return
+        print("❌ [致命的エラー] すべてのデータソースおよび固定マスターCSVの読み込みに失敗しました。現在のデータを保護するため、書き出しを安全にスキップして早期終了します。")
+        sys.exit(1) # 👑 処理が空振りした場合はActions側を正しくエラーで止めます
 
     try:
-        # パブリックオープンデータのロードとクリーニング（容量節約のため不要なカラムは削る）
-        df = pd.read_csv(csv_file, encoding="utf-8")
+        # 👑 改善: ExcelのShift_JISやBOM付きUTF-8など、どんな文字コードで保存されたCSVでも自動で判別して読み込む超堅牢設計
+        df = None
+        encodings = ["utf-8-sig", "shift_jis", "cp932", "utf-8"]
+        for enc in encodings:
+            try:
+                print(f"📖 CSVをエンコーディング '{enc}' で読み込みを試みています...")
+                df = pd.read_csv(csv_file, encoding=enc)
+                print(f"🟢 '{enc}' での読み込みに成功しました！")
+                break
+            except Exception as e:
+                print(f"⚠️ '{enc}' での読み込みはスキップされました（原因: {e}）")
+                continue
+
+        if df is None:
+            raise ValueError("すべての主要エンコーディングでCSVを読み込むことができませんでした。ファイルの文字コードを確認してください。")
         
-        # 必要なカラムのみに厳選（1.5MB以内に収めるための極限設計）
-        # ※厚労省/デジタル庁オープンデータのカラム構造に対応
         required_cols = {
             "都道府県名": "prefecture",
             "市区町村名": "city",
@@ -74,13 +83,11 @@ def main():
             "対象相談タグ": "tags"
         }
         
-        # データの存在確認と安全なマッピング（ダミーデータ補完付き、KeyError防止）
         df_cleaned = pd.DataFrame()
         for jp_col, en_col in required_cols.items():
             if jp_col in df.columns:
                 df_cleaned[en_col] = df[jp_col]
             else:
-                # 存在しないカラムは安全に空文字やデフォルト値でフォールバック補完（デグレ防止）
                 if en_col == "hours":
                     df_cleaned[en_col] = "平日 08:30-17:15"
                 elif en_col == "tags":
@@ -88,10 +95,8 @@ def main():
                 else:
                     df_cleaned[en_col] = "-"
                     
-        # データの正規化（重複削除、NaN埋め）
         df_cleaned = df_cleaned.fillna("-")
         
-        # タグの文字列をリスト形式に変換
         facilities = []
         now_date = datetime.now(JST).strftime('%Y-%m-%d')
         
@@ -110,11 +115,10 @@ def main():
                 "form_url": str(row["form_url"]) if str(row["form_url"]) != "-" else "",
                 "official_url": str(row["official_url"]) if str(row["official_url"]) != "-" else "",
                 "hours": str(row["hours"]),
-                "last_verified": now_date, # 👑 指摘③解決: 個別情報検証日
+                "last_verified": now_date,
                 "tags": tags_list
             })
             
-        # 👑 指摘④解決: 部屋割りJSONの書き出し（全国共通窓口を national_services に統合、ファイル追加ゼロ！）
         output_data = {
             "version": "1.2.0",
             "updated_at": datetime.now(JST).strftime('%Y-%m-%d %H:%M:%S'),
@@ -129,8 +133,8 @@ def main():
         
     except Exception as e:
         print(f"❌ [ビルド失敗] データ処理中にエラーが発生しました: {e}")
+        sys.exit(1) # 👑 失敗した時はActionsをここでエラー停止させ、ログを吐き出させます
     finally:
-        # 一時ファイルのクリーンアップ
         if os.path.exists("temp_fukushi.csv"):
             os.remove("temp_fukushi.csv")
 
