@@ -1,3 +1,3 @@
 name = "magokoro-sw-navi"
-main = "worker.js"
+main = "src/worker.js"
 compatibility_date = "2026-06-06"
