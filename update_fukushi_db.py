@@ -6,8 +6,8 @@ import sys  # 👑 エラーを正しくActionsに伝えるために追加
 from datetime import datetime, timezone, timedelta
 
 # ==========================================
-// 👑 福祉架け橋OS: データベース更新エンジン（Ver 1.2.2 堅牢版）
-// 開発者: ちゃろ ＆ AIバディ
+# 👑 福祉架け橋OS: データベース更新エンジン（Ver 1.2.3 堅牢版）
+# 開発者: ちゃろ ＆ AIバディ
 # ==========================================
 
 CONFIG_FILE = "config.json"
